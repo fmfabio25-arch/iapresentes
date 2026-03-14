@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>iapresentes.com.br — A IA que encontra o presente perfeito</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --dark: #0d0918; --dark2: #160f28;
+    --gold: #e8943a; --gold2: #f5c060;
+    --amber: #c8622a; --cream: #f5deb3;
+    --muted: #8a7a60; --text: #ede0c8;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--dark); color:var(--text); font-family:'Lato',sans-serif; overflow-x:hidden; }
+
+  .bg-orbs { position:fixed; inset:0; pointer-events:none; z-index:0; }
+  .orb { position:absolute; border-radius:50%; filter:blur(80px); animation:drift 14s ease-in-out infinite; }
+  .orb1 { width:600px;height:600px;top:-200px;right:-100px;background:radial-gradient(circle,rgba(220,80,40,.15),transparent 70%); }
+  .orb2 { width:500px;height:500px;bottom:-150px;left:-100px;background:radial-gradient(circle,rgba(245,192,96,.1),transparent 70%);animation-delay:-5s; }
+  @keyframes drift { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-20px) scale(1.05)} 66%{transform:translate(-20px,15px) scale(.97)} }
+
+  nav {
+    position:sticky;top:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 60px;
+    background:rgba(13,9,24,.85);backdrop-filter:blur(18px);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .nav-logo { display:flex;align-items:center;gap:10px; }
+  .nav-logo-icon { font-size:28px; }
+  .nav-logo-text { font-family:'Playfair Display',serif;font-size:22px;font-weight:700; }
+  .nav-logo-text span { color:var(--muted);font-weight:400; }
+  .nav-cta {
+    padding:10px 24px;background:linear-gradient(135deg,var(--amber),var(--gold));
+    border:none;border-radius:30px;color:#fff;font-size:13px;font-weight:700;
+    letter-spacing:.05em;cursor:pointer;font-family:'Lato',sans-serif;
+    text-transform:uppercase;transition:all .3s;box-shadow:0 4px 20px rgba(200,98,42,.3);
+  }
+  .nav-cta:hover { transform:translateY(-2px);box-shadow:0 8px 28px rgba(200,98,42,.45); }
+
+  /* HERO */
+  .hero {
+    position:relative;z-index:1;min-height:88vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:80px 24px;
+  }
+  .hero-badge {
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(232,148,58,.12);border:1px solid rgba(232,148,58,.3);
+    border-radius:30px;padding:6px 18px;font-size:12px;font-weight:700;
+    letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-bottom:28px;
+    animation:fadeUp .6s ease both;
+  }
+  .hero-headline {
+    font-family:'Playfair Display',serif;font-size:clamp(36px,6vw,70px);
+    font-weight:900;line-height:1.1;margin-bottom:20px;
+    animation:fadeUp .6s .1s ease both;
+  }
+  .hero-headline .accent {
+    background:linear-gradient(135deg,var(--cream),var(--gold2),var(--gold));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .hero-headline em { font-style:italic;color:var(--gold);-webkit-text-fill-color:var(--gold); }
+  .hero-sub { font-size:18px;color:var(--muted);max-width:540px;line-height:1.7;margin-bottom:44px;animation:fadeUp .6s .2s ease both; }
+  .hero-sub strong { color:var(--cream); }
+  .btn-primary {
+    padding:16px 40px;background:linear-gradient(135deg,var(--amber) 0%,var(--gold) 50%,var(--amber) 100%);
+    background-size:200% 100%;border:none;border-radius:50px;color:#fff;
+    font-size:16px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;
+    box-shadow:0 6px 30px rgba(200,98,42,.35);transition:all .3s;animation:fadeUp .6s .3s ease both;
+  }
+  .btn-primary:hover { transform:translateY(-3px);box-shadow:0 12px 40px rgba(200,98,42,.5); }
+  .floating-gifts { position:absolute;inset:0;pointer-events:none;overflow:hidden; }
+  .fg { position:absolute;font-size:28px;opacity:.1;animation:floatUp linear infinite; }
+  .fg:nth-child(1){left:5%;animation-duration:12s}
+  .fg:nth-child(2){left:15%;animation-duration:15s;animation-delay:-3s}
+  .fg:nth-child(3){left:25%;animation-duration:10s;animation-delay:-7s;font-size:20px}
+  .fg:nth-child(4){left:65%;animation-duration:14s;animation-delay:-1s}
+  .fg:nth-child(5){left:80%;animation-duration:11s;animation-delay:-5s}
+  .fg:nth-child(6){left:90%;animation-duration:16s;animation-delay:-8s;font-size:18px}
+  @keyframes floatUp {
+    0%{transform:translateY(110vh) rotate(0deg);opacity:0}
+    10%{opacity:.1} 90%{opacity:.1}
+    100%{transform:translateY(-10vh) rotate(360deg);opacity:0}
+  }
+
+  /* MAIN FORM SECTION */
+  .main { position:relative;z-index:1;max-width:820px;margin:0 auto;padding:0 24px 80px; }
+
+  .card {
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+    border-radius:24px;padding:44px 48px;backdrop-filter:blur(12px);
+  }
+  .card-title { font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--cream);margin-bottom:6px; }
+  .card-sub { font-size:14px;color:var(--muted);margin-bottom:36px; }
+
+  .grid2 { display:grid;grid-template-columns:1fr 1fr;gap:0 24px; }
+  .field { margin-bottom:20px; }
+  .label { display:block;font-size:13px;font-weight:700;color:#c8a96e;margin-bottom:6px;letter-spacing:.04em; }
+  .input {
+    width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;
+    font-family:inherit;outline:none;transition:border .2s;
+  }
+  .input:focus { border-color:rgba(232,148,58,.5);box-shadow:0 0 0 3px rgba(200,98,42,.1); }
+  textarea.input { resize:vertical;line-height:1.5; }
+  select.input option { background:#1a1028;color:var(--text); }
+
+  .radio-group { display:flex;flex-wrap:wrap;gap:8px; }
+  .radio-opt {
+    padding:7px 14px;border:1px solid rgba(255,255,255,.12);border-radius:30px;
+    font-size:13px;cursor:pointer;color:var(--muted);transition:all .2s;user-select:none;
+  }
+  .radio-opt.active { background:rgba(200,98,42,.25);border-color:rgba(200,98,42,.5);color:var(--cream); }
+
+  .submit-btn {
+    width:100%;padding:16px;background:linear-gradient(135deg,var(--amber),var(--gold));
+    border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:700;
+    cursor:pointer;font-family:inherit;letter-spacing:.03em;margin-top:8px;
+    transition:all .3s;box-shadow:0 4px 20px rgba(200,98,42,.3);
+  }
+  .submit-btn:hover { transform:translateY(-2px);box-shadow:0 8px 30px rgba(200,98,42,.5); }
+  .submit-btn:disabled { opacity:.6;cursor:not-allowed;transform:none; }
+
+  .error { color:#e07070;font-size:14px;margin-bottom:12px;padding:10px 14px;background:rgba(220,80,80,.1);border-radius:8px;border:1px solid rgba(220,80,80,.2); }
+
+  /* LOADING */
+  .loading-wrap { text-align:center;padding:80px 24px; }
+  .loading-icon { font-size:52px;animation:spin 1.8s ease-in-out infinite;display:inline-block; }
+  @keyframes spin { 0%{transform:scale(1) rotate(0deg)} 50%{transform:scale(1.2) rotate(180deg)} 100%{transform:scale(1) rotate(360deg)} }
+  .loading-title { font-family:'Playfair Display',serif;font-size:26px;color:var(--cream);margin:20px 0 8px; }
+  .loading-text { color:var(--muted);font-size:15px; }
+  .dots { display:flex;gap:8px;justify-content:center;margin-top:24px; }
+  .dot { width:10px;height:10px;border-radius:50%;background:var(--amber);display:inline-block;animation:bounce .8s ease-in-out infinite; }
+  .dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
+  @keyframes bounce { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(-10px);opacity:1} }
+
+  /* RESULTS */
+  .results-header { text-align:center;margin-bottom:40px; }
+  .results-title { font-family:'Playfair Display',serif;font-size:30px;color:var(--cream);margin-bottom:8px; }
+  .results-sub { color:var(--muted);font-size:14px;font-style:italic; }
+  .gifts-list { display:flex;flex-direction:column;gap:14px; }
+  .gift-card {
+    display:flex;align-items:flex-start;gap:16px;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+    border-radius:16px;padding:20px 24px;transition:all .25s;
+  }
+  .gift-card:hover { background:rgba(255,255,255,.07);border-color:rgba(232,148,58,.25);transform:translateX(4px); }
+  .gift-num {
+    min-width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,var(--amber),var(--gold));
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:#fff;flex-shrink:0;margin-top:2px;
+  }
+  .gift-emoji { font-size:32px;line-height:1;flex-shrink:0; }
+  .gift-body { flex:1; }
+  .gift-title { font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--cream);margin-bottom:6px; }
+  .gift-desc { font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:10px; }
+  .gift-price {
+    display:inline-block;background:rgba(200,98,42,.15);border:1px solid rgba(200,98,42,.3);
+    color:var(--gold);font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;
+  }
+
+  .actions { display:flex;gap:14px;margin-top:32px; }
+  .btn-secondary {
+    flex:1;padding:14px 24px;background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#c8a96e;
+    font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .3s;
+  }
+  .btn-secondary:hover { background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2); }
+  .btn-results { flex:1;padding:14px;background:linear-gradient(135deg,var(--amber),var(--gold));border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .3s; }
+  .btn-results:hover { opacity:.9;transform:translateY(-2px); }
+
+  footer { position:relative;z-index:1;text-align:center;padding:40px 24px;border-top:1px solid rgba(255,255,255,.05);color:rgba(138,122,96,.5);font-size:12px;letter-spacing:.05em; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+  .fade-in { animation:fadeUp .5s ease both; }
+
+  @media(max-width:620px){
+    nav{padding:14px 20px}
+    .card{padding:28px 20px}
+    .grid2{grid-template-columns:1fr}
+    .actions{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <span class="nav-logo-icon">🎁</span>
+    <span class="nav-logo-text"><span>ia</span>presentes</span>
+  </div>
+  <button class="nav-cta" onclick="scrollToForm()">✨ Encontrar Presente</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="floating-gifts" aria-hidden="true">
+    <span class="fg">🎁</span><span class="fg">🎀</span><span class="fg">🎊</span>
+    <span class="fg">🎁</span><span class="fg">🎉</span><span class="fg">🎁</span>
+  </div>
+  <div class="hero-badge">✦ Inteligência Artificial ✦</div>
+  <h1 class="hero-headline">
+    Nunca mais fique<br>
+    <em>sem saber</em> o que <span class="accent">presentear</span>
+  </h1>
+  <p class="hero-sub">
+    Descreva a pessoa e a ocasião. Nossa IA analisa o perfil e sugere os
+    <strong>10 presentes perfeitos</strong> em segundos.
+  </p>
+  <button class="btn-primary" onclick="scrollToForm()">🎁 Encontrar Presente Agora</button>
+</section>
+
+<!-- FORM / LOADING / RESULTS -->
+<div class="main" id="form-section">
+
+  <!-- FORM -->
+  <div id="view-form" class="card fade-in">
+    <h2 class="card-title">🎀 Conte-nos sobre quem vai receber</h2>
+    <p class="card-sub">Quanto mais detalhes, melhores as sugestões!</p>
+
+    <div class="grid2">
+      <div class="field">
+        <label class="label">👤 Nome (opcional)</label>
+        <input class="input" id="nome" type="text" placeholder="Ex: Maria, João..."/>
+      </div>
+      <div class="field">
+        <label class="label">🎂 Idade</label>
+        <input class="input" id="idade" type="text" placeholder="Ex: 28 anos"/>
+      </div>
+      <div class="field">
+        <label class="label">✨ Gênero</label>
+        <select class="input" id="genero">
+          <option value="">Selecione...</option>
+          <option>Feminino</option><option>Masculino</option>
+          <option>Não-binário</option><option>Prefiro não dizer</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">🥳 Ocasião</label>
+        <select class="input" id="ocasiao">
+          <option value="">Selecione...</option>
+          <option>Aniversário</option><option>Natal</option>
+          <option>Dia das Mães</option><option>Dia dos Pais</option>
+          <option>Dia dos Namorados</option><option>Formatura</option>
+          <option>Casamento</option><option>Sem ocasião especial</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">💰 Orçamento</label>
+      <div class="radio-group" id="orcamento-group">
+        <span class="radio-opt" onclick="selectOrcamento(this)">Até R$ 50</span>
+        <span class="radio-opt active" onclick="selectOrcamento(this)">R$ 50–150</span>
+        <span class="radio-opt" onclick="selectOrcamento(this)">R$ 150–300</span>
+        <span class="radio-opt" onclick="selectOrcamento(this)">R$ 300–500</span>
+        <span class="radio-opt" onclick="selectOrcamento(this)">Acima de R$ 500</span>
+        <span class="radio-opt" onclick="selectOrcamento(this)">Sem limite</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">💡 Personalidade e jeito de ser *</label>
+      <textarea class="input" id="personalidade" rows="3" placeholder="Ex: Criativa, introvertida, aprecia coisas únicas e artesanais, muito conectada com natureza..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">🎯 Hobbies e interesses *</label>
+      <textarea class="input" id="hobbies" rows="3" placeholder="Ex: Leitura, culinária, yoga, tecnologia, viagens, games, música..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="label">📝 Algum detalhe especial?</label>
+      <textarea class="input" id="extra" rows="2" placeholder="Ex: Acabou de se mudar, ama gatos, é vegetariana, adora café..."></textarea>
+    </div>
+
+    <div id="form-error" class="error" style="display:none"></div>
+
+    <button class="submit-btn" id="submit-btn" onclick="buscarPresentes()">
+      ✨ Descobrir os 10 Melhores Presentes
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div id="view-loading" style="display:none" class="loading-wrap fade-in">
+    <div class="loading-icon">🎁</div>
+    <h3 class="loading-title">A IA está pensando...</h3>
+    <p class="loading-text">Analisando o perfil e buscando os presentes perfeitos</p>
+    <div class="dots">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="view-results" style="display:none" class="fade-in">
+    <div class="results-header">
+      <h2 class="results-title" id="results-title">🎉 10 Presentes Perfeitos!</h2>
+      <p class="results-sub">Selecionados especialmente pela IA com base no perfil informado</p>
+    </div>
+    <div class="gifts-list" id="gifts-list"></div>
+    <div class="actions">
+      <button class="btn-secondary" onclick="voltarForm()">🔄 Nova busca</button>
+      <button class="btn-results" onclick="buscarPresentes()">✨ Novas sugestões</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>iapresentes.com.br · Powered by Claude AI 🤖</footer>
+
+<script>
+  let orcamentoSelecionado = "R$ 50–150";
+
+  function selectOrcamento(el) {
+    document.querySelectorAll(".radio-opt").forEach(o => o.classList.remove("active"));
+    el.classList.add("active");
+    orcamentoSelecionado = el.textContent;
+  }
+
+  function scrollToForm() {
+    document.getElementById("form-section").scrollIntoView({ behavior: "smooth" });
+  }
+
+  function show(id) {
+    ["view-form","view-loading","view-results"].forEach(v => {
+      document.getElementById(v).style.display = v === id ? "block" : "none";
+    });
+  }
+
+  function voltarForm() { show("view-form"); }
+
+  function buildPrompt(f) {
+    return `Você é um especialista em presentes criativos e personalizados. Com base nas características abaixo, sugira exatamente 10 presentes ideais.
+
+Dados da pessoa:
+- Nome: ${f.nome || "Não informado"}
+- Idade: ${f.idade || "Não informada"}
+- Gênero: ${f.genero || "Não informado"}
+- Personalidade: ${f.personalidade || "Não informada"}
+- Hobbies: ${f.hobbies || "Não informados"}
+- Ocasião: ${f.ocasiao || "Não informada"}
+- Orçamento: ${f.orcamento}
+- Detalhes extras: ${f.extra || "Nenhum"}
+
+Responda APENAS com JSON válido, sem markdown, no formato:
+{"presentes":[{"titulo":"Nome","descricao":"1-2 frases","faixaPreco":"R$ X–Y","emoji":"emoji"}]}`;
+  }
+
+  async function buscarPresentes() {
+    const form = {
+      nome: document.getElementById("nome").value,
+      idade: document.getElementById("idade").value,
+      genero: document.getElementById("genero").value,
+      ocasiao: document.getElementById("ocasiao").value,
+      personalidade: document.getElementById("personalidade").value,
+      hobbies: document.getElementById("hobbies").value,
+      extra: document.getElementById("extra").value,
+      orcamento: orcamentoSelecionado
+    };
+
+    const errEl = document.getElementById("form-error");
+    if (!form.personalidade && !form.hobbies) {
+      errEl.textContent = "⚠️ Preencha pelo menos a personalidade ou os hobbies.";
+      errEl.style.display = "block";
+      return;
+    }
+    errEl.style.display = "none";
+
+    show("view-loading");
+
+    try {
+      // ✅ Chama o backend /api/sugestoes — a API key fica segura no servidor
+      const response = await fetch("/api/sugestoes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ perfil: buildPrompt(form) })
+      });
+
+      const data = await response.json();
+      const text = data.content?.map(b => b.text || "").join("") || "";
+      const clean = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+      const gifts = parsed.presentes || [];
+
+      // Renderiza os cards
+      const nome = form.nome ? ` para ${form.nome}` : "";
+      document.getElementById("results-title").textContent = `🎉 ${gifts.length} Presentes Perfeitos${nome}!`;
+      document.getElementById("gifts-list").innerHTML = gifts.map((g, i) => `
+        <div class="gift-card">
+          <div class="gift-num">${i + 1}</div>
+          <div class="gift-emoji">${g.emoji}</div>
+          <div class="gift-body">
+            <div class="gift-title">${g.titulo}</div>
+            <p class="gift-desc">${g.descricao}</p>
+            ${g.faixaPreco ? `<span class="gift-price">${g.faixaPreco}</span>` : ""}
+          </div>
+        </div>
+      `).join("");
+
+      show("view-results");
+      scrollToForm();
+
+    } catch (e) {
+      show("view-form");
+      const errEl = document.getElementById("form-error");
+      errEl.textContent = "⚠️ Ops! Algo deu errado. Verifique sua conexão e tente novamente.";
+      errEl.style.display = "block";
+    }
+  }
+</script>
+</body>
+</html>
